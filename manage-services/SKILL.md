@@ -28,6 +28,7 @@ Define and implement business logic as reusable, transactional, and securely enf
 - **`group`**: Use as a simple orchestration wrapper for multiple independent services sequentially. Replaces the need to write an orchestration script.
 
 ### 2. Service Definition & Registration
+- **Naming**: Use `verbNoun` format for all service names (e.g., `updateExample`, `createOrder`).
 - **In/Out Parameters**: Use `<attribute name="..." mode="IN|OUT|INOUT" type="..." optional="true|false"/>`. NEVER bypass attribute validation by casually omitting them or making them wrongly optional.
 - **Auth & Security**: Set `auth="true"` for protected services. ALWAYS implement permission checks (e.g., `<permission-service>`).
 - **Export & REST**: Set `export="true"` to expose the service to external callers. Set `action="GET|POST|PUT|DELETE"` to automatically export the service as a REST API endpoint.
