@@ -23,7 +23,7 @@ The goal of this skill is to correctly define and execute Service Groups, unders
 - **Groovy Engine (`engine="groovy"`)**: Use if your workflow requires conditional `if/else` logic, try/catch error handling, complex iteration, or complex data transformations between service steps.
 
 ### 2. Define the Group Service (`services.xml`)
-In your `services.xml`, define a service using `engine="group"`. Ensure you include the `invoke` and `use-transaction` attributes.
+In your `services.xml`, define a service using `engine="group"`. Ensure you include the `invoke` and `use-transaction` attributes. (**Cross-Reference**: See the `manage-services` skill for comprehensive rules on service definitions, authentication, and REST exports.)
 
 ```xml
 <service name="myServiceGroup" engine="group" invoke="myServiceGroup"
@@ -75,7 +75,7 @@ The `<invoke>` element defines the individual service calls.
 ---
 
 ## Guardrails
-- **Transaction Behavior**: A group service is just a service call. The transaction boundaries follow the service attributes (`use-transaction`, `require-new-transaction`) of the group service and/or the invoked child services. There is no hard rule that a group always equals a single transaction.
+- **Transaction Behavior**: A group service is just a service call. The transaction boundaries follow the service attributes (`use-transaction`, `require-new-transaction`) of the group service and/or the invoked child services. There is no hard rule that a group always equals a single transaction. (**Cross-Reference**: See the `manage-services` skill for deep-dives into `use-transaction` versus `require-new-transaction` mapping).
 - **Context collisions**: Context passing only happens when `result-to-context="true"` for `sync` steps. Context collisions are a risk here; encourage prefixing output keys or mapping results in wrapper services.
 
 ---
