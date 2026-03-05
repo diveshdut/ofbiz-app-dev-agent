@@ -15,7 +15,7 @@ Define and implement business logic as reusable, transactional, and securely enf
 - Implementing service logic in Java, Groovy, or MiniLang.
 - Troubleshooting service execution, validation, transactions, or asynchronous behavior.
 - Exposing business logic to the UI or API.
-- Orchestrating complex data workflows.
+- Orchestrating complex data workflows. (**Cross-Reference**: See the `manage-service-groups` skill for orchestrating sequential or concurrent flows without complex branching)
 - Handling transactional operations (e.g., database commit/rollback boundaries).
 - Dispatching asynchronous jobs or delayed callbacks.
 
@@ -25,7 +25,7 @@ Define and implement business logic as reusable, transactional, and securely enf
 - **`entity-auto`**: Use for standard CRUD (Create, Update, Delete). Highly efficient; eliminates manual boilerplate.
 - **`groovy`**: Use for logic requiring entity queries, map manipulation, parameter adaptations, or UI preparation. Fast to write, minimal boilerplate.
 - **`java`**: Use for core domain invariants, strict compile-time typing, performance-heavy transformations, heavy loops, or integrating with 3rd-party libraries.
-- **`group`**: Use as a simple orchestration wrapper for multiple independent services sequentially. Replaces the need to write an orchestration script.
+- **`group`**: Use as a simple orchestration wrapper for multiple independent services sequentially. Replaces the need to write an orchestration script. (**Cross-Reference**: See the `manage-service-groups` skill for group definitions, execution modes (`send-mode`), and orchestration anti-patterns.)
 
 ### 2. Service Definition & Registration
 - **In/Out Parameters**: Use `<attribute name="..." mode="IN|OUT|INOUT" type="..." optional="true|false"/>`. NEVER bypass attribute validation by casually omitting them or making them wrongly optional.
