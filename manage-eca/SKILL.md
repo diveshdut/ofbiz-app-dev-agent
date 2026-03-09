@@ -25,7 +25,7 @@ ECAs are powerful — but misused ECAs are one of the fastest ways to destabiliz
 **Step 1: Is this logic part of the main business flow?**
 Examples: "Order approval must reserve inventory", "Shipment creation must validate allocation", "Invoice must be generated or order is invalid".
 - **YES** → **Explicit chaining / orchestrator service**
-  - (Call the next service directly, or create a wrapper service like `processOrderApproval` that orchestrates steps.)
+  - (Call the next service directly, or create a wrapper service like `processOrderApproval` that orchestrates steps using **Groovy** (**Cross-Reference**: `manage-groovy`) or **Service Groups** (**Cross-Reference**: `manage-service-groups`).)
 - **NO** → Go to Step 2
 *Rule: If removing it breaks the flow, it’s not an ECA.*
 
@@ -43,11 +43,8 @@ Ask: "What event should cause this to happen?"
 
 **Step 3: Does the triggered work need committed DB state?**
 Ask: "Will the triggered service read data written by the triggering work?"
-- **YES** → Use post-commit trigger
-  - **SECA**: `event="commit"`
-  - **EECA**: prefer `event="return"` but ensure the consuming logic doesn’t require uncommitted visibility; if it must read committed state reliably, prefer SECA on commit of the creating/updating service (or pass required data directly).
-- **NO** → `return` is usually fine
-  - (SECA: `event="return"`, EECA: `event="return"`)
+- **YES** → The triggered logic *must* see committed state. Use a post-commit event (`event="commit"` or `event="global-commit"` for SECAs).
+- **NO** → The logic runs fine concurrently or before commit. Use `event="return"` (the most common default for SECAs and EECAs).
 *Key: async is concurrent; commit matters when reads must see written data.*
 
 **Step 4: Is the action heavy / slow / failure-tolerant?**
@@ -99,7 +96,9 @@ SECAs trigger a service when another service reaches a specific life-cycle event
 
 #### Event Selection Rules
 - **return**: Business logic completed, transaction not yet committed (most common).
-- **commit**: Use ONLY when the triggered service must see committed data.
+- **commit**: The transaction for the current service call commits (does not mean the entire base transaction commits if `use-transaction="true"` allows joining an outer transaction). Use ONLY when the triggered service must see locally committed data but doesn't strictly depend on the global transaction.
+- **global-commit**: Triggered *only* when the top-level (global) transaction successfully commits. Essential for side-effects (like emails or external API calls) that must definitely not happen if the overall operation rolls back.
+- **global-rollback**: Triggered *only* if the top-level transaction rolls back. Used for compensating actions (like releasing a hold on a 3rd party system).
 - **invoke**: Avoid "invoke" unless modifying input context is required.
 - `auth`: Before authentication.
 - `in-validate`: Before input validation.
@@ -147,15 +146,22 @@ EECAs trigger a service when a database operation occurs on a specific entity.
 ## Examples: Good Patterns vs Anti-Patterns
 
 ### 1. Order Completion SECA (Good Pattern for Live Traffic)
-Triggering an email and resetting totals after an order is stored.
+Triggering synchronous logic immediately, but deferring heavy or external actions until the transaction is fully complete. Note that the async email is triggered on `global-commit`, NOT `return`.
+
 ```xml
+<!-- Good: Synchronously recalculate totals before transaction finishes -->
 <eca service="storeOrder" event="return">
     <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
     <action service="resetOrderGrandTotal" mode="sync"/>
+</eca>
+
+<!-- Good: Asynchronously send email ONLY after the transaction is fully committed to DB -->
+<eca service="storeOrder" event="global-commit">
+    <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
     <action service="sendOrderConfirmationEmail" mode="async" persist="true"/>
 </eca>
 ```
-**Why this is good (for live traffic)**: It decouples the heavy network call (email) from the transaction, avoiding blocking the user during checkout.
+**Why this is good (for live traffic)**: It decouples the heavy network call (email) from the transaction, avoiding blocking the user during checkout. Furthermore, using `global-commit` ensures the async service won't try to query the order data from the DB *before* the main thread commits it.
 
 **ANTI-PATTERN: Leaving this enabled for bulk historical imports.**
 This async + persist strategy is **WRONG** if:
@@ -197,9 +203,32 @@ This async + persist strategy is **WRONG** if:
 Automatically indexing keywords whenever a Product is created or updated.
 ```xml
 <eca entity="Product" operation="create" event="return">
-    <action service="indexProductKeywords" mode="sync" value-attr="productInstance"/>
+    <action service="indexProductKeywords" mode="sync"/>
 </eca>
 <eca entity="Product" operation="store" event="return">
-    <action service="indexProductKeywords" mode="sync" value-attr="productInstance"/>
+    <action service="indexProductKeywords" mode="sync"/>
 </eca>
 ```
+
+### 6. Commit vs Global Commit / Rollback SECAs
+Using `commit` fires the action when the local service's transaction commits (useful if the service uses `require-new-transaction="true"`).
+Using `global-commit` ensures an action only fires if the entire base transaction succeeds, preventing side effects during an outer rollback.
+Using `global-rollback` allows compensating actions if the transaction fails.
+
+```xml
+<!-- Good: Only send the email if the entire order creation transaction truly commits -->
+<eca service="createOrder" event="global-commit">
+    <action service="sendOrderConfirmationEmail" mode="async" persist="true"/>
+</eca>
+
+<!-- Good: If a specific sub-service's isolated transaction commits, trigger the action immediately, even if the parent fails later -->
+<eca service="logOrderAudit" event="commit">
+    <action service="triggerAuditWebhook" mode="sync"/>
+</eca>
+
+<!-- Good: If the payment capture transaction rolls back, release the 3rd party auth -->
+<eca service="capturePayment" event="global-rollback">
+    <action service="releasePaymentAuthorization" mode="sync"/>
+</eca>
+```
+
