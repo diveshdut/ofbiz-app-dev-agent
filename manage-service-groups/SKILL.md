@@ -5,7 +5,7 @@ description: Orchestrate multiple services using the OFBiz Group Engine for sequ
 
 # Manage Service Groups
 
-Service Groups allow you to define a single service that acts as a wrapper for multiple child services. This is ideal for orchestrating complex workflows where several independent services need to run together.
+Service Groups allow you to define a single service that acts as a wrapper for multiple child services. This is ideal for orchestrating complex workflows where several independent services need to run together. (**Cross-Reference**: See the [manage-services](../manage-services/SKILL.md) skill for the foundational rules on service implementation).
 
 ## Triggers
 - Executing multiple services in a specific sequence.
@@ -30,7 +30,7 @@ In your `services.xml`, define a service using `engine="group"`. Ensure you incl
 ```
 
 ### 3. Define the Group Members
-Create a `groups.xml` (or similar) file to define which services belong to the group.
+Create a `groups.xml` (or similar) file to define which services belong to the group. (**Cross-Reference**: Ensure each individual member service is defined according to the rules in [manage-services](../manage-services/SKILL.md)).
 
 - **Location**: Typically `servicedef/groups.xml`.
 - **Registration**: Register in `ofbiz-component.xml`:
