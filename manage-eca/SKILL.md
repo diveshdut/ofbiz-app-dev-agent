@@ -25,7 +25,7 @@ ECAs are powerful — but misused ECAs are one of the fastest ways to destabiliz
 **Step 1: Is this logic part of the main business flow?**
 Examples: "Order approval must reserve inventory", "Shipment creation must validate allocation", "Invoice must be generated or order is invalid".
 - **YES** → **Explicit chaining / orchestrator service**
-  - (Call the next service directly, or create a wrapper service like `processOrderApproval` that orchestrates steps.)
+  - (Call the next service directly, or create a wrapper service like `processOrderApproval` that orchestrates steps using **Groovy** (**Cross-Reference**: `manage-groovy`) or **Service Groups** (**Cross-Reference**: `manage-service-groups`).)
 - **NO** → Go to Step 2
 *Rule: If removing it breaks the flow, it’s not an ECA.*
 
