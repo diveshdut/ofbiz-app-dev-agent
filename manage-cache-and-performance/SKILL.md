@@ -55,8 +55,8 @@ OFBiz automatically caches entity lookups if configured.
   ```
 - **Programmatic Caching (Delegator)**:
   ```java
-  GenericValue val = delegator.findOne("Product", UtilMisc.toMap("productId", "10000"), true);
-  List<GenericValue> list = delegator.findList("ProductCategory", null, null, null, null, true);
+  GenericValue val = EntityQuery.use(delegator).from("Product").where("productId", "10000").cache(true).queryOne();
+  List<GenericValue> list = EntityQuery.use(delegator).from("ProductCategory").cache(true).queryList();
   ```
 *Note: `delegator.findOne(..., true)` hits the shared Entity Engine cache, whereas `UtilCache` is a general-purpose application-level cache.*
 
@@ -139,7 +139,7 @@ cache.put(userLoginId, calculatedPrice);
 // 🚨 ANTI-PATTERN: Caching without an invalidation strategy
 GenericValue product = productCache.get(productId);
 if (product == null) {
-    product = delegator.findOne("Product", key, true);
+    product = EntityQuery.use(delegator).from("Product").where(key).cache(true).queryOne();
     productCache.put(productId, product);
 }
 // No invalidation anywhere
@@ -177,4 +177,3 @@ my.custom.cache.useSoftReference=true
 my.custom.cache.maxSize=5000
 my.custom.cache.expireTime=3600000
 my.custom.cache.useSoftReference=true
-```

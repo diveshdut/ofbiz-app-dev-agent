@@ -22,6 +22,7 @@ Define and maintain display text, messages, and titles in a localized manner usi
     - Check `ofbiz-component.xml` to ensure the `config/` directory is in the classpath.
 2. **Label Definition**:
     - Use `<property key="...">` for each label.
+    - **Alphabetical Order**: Maintain property keys in alphabetical order to make searching and sorting easy.
     - Provide values for different languages using `<value xml:lang="...">`.
 3. **Usage in Widgets**:
     - Access labels in Screen, Form, or Menu widgets using `${uiLabelMap.LabelKey}`.
@@ -33,18 +34,19 @@ Define and maintain display text, messages, and titles in a localized manner usi
 - **Naming**: Property keys should be descriptive and use PascalCase (e.g., `PageTitleEditExample`).
 - **Resource Loading**: Ensure the resource map is loaded in the screen actions via `<property-map resource="...UiLabels" map-name="uiLabelMap" global="true"/>`.
 - **Consistency**: Check `CommonUiLabels` in the `common` component for generic terms (e.g., `CommonSave`, `CommonCancel`) before creating new ones.
+- **Ordering**: Always keep labels sorted alphabetically by key within the XML file.
 
 ## Examples
-**Example: UI Label Definition**
+**Example: UI Label Definition (Alphabetically Sorted)**
 ```xml
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <property key="PageTitleEditExample">
-        <value xml:lang="en">Edit Example</value>
-        <value xml:lang="fr">Modifier l'exemple</value>
-    </property>
     <property key="ExampleExampleId">
         <value xml:lang="en">Example ID</value>
         <value xml:lang="fr">ID d'exemple</value>
+    </property>
+    <property key="PageTitleEditExample">
+        <value xml:lang="en">Edit Example</value>
+        <value xml:lang="fr">Modifier l'exemple</value>
     </property>
 </resource>
 ```

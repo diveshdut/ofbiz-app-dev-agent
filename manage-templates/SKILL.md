@@ -33,7 +33,7 @@ Define and maintain complex OFBiz Freemarker (FTL) templates, ensuring correct u
 4. **Context & Data Access**:
     - Access `parameters.xyz` for request parameters.
     - Access `requestAttributes.xyz` or `sessionAttributes.xyz` for backend data.
-    - **In-template Data Fetching**: Use `delegator` or `dispatcher` directly for lightweight lookups (e.g., `${delegator.findOne("Product", {"productId": pid}, true).productName!}`).
+    - **In-template Data Fetching**: Use `EntityQuery` or `dispatcher` for lightweight lookups (e.g., `${Static["org.ofbiz.entity.util.EntityQuery"].use(delegator).from("Product").where("productId", pid).cache(true).queryOne().productName!}` or `${dispatcher.runSync("serviceName", {"param": value}).resultAttr!}`).
     - Use `Static["class.path"].method()` for Java utility calls (use sparingly).
 5. **HTML5 Semantic Structure**:
     - **Mandatory**: Use semantic tags (`<header>`, `<main>`, `<section>`, `<article>`, `<footer>`) instead of generic `<div>` wrappers.
@@ -62,7 +62,7 @@ Define and maintain complex OFBiz Freemarker (FTL) templates, ensuring correct u
       <ul class="product-list" role="list">
         <#list productList as product>
           <#-- Data fetching lookup for category name -->
-          <#assign category = delegator.findOne("ProductCategory", {"productCategoryId": product.primaryProductCategoryId!}, true)! />
+          <#assign category = Static["org.ofbiz.entity.util.EntityQuery"].use(delegator).from("ProductCategory").where("productCategoryId", product.primaryProductCategoryId!).cache(true).queryOne()! />
           <#assign price = productPriceMap[product.productId]! />
           
           <li class="product-item">
