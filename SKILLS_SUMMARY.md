@@ -21,6 +21,7 @@ This document provides a high-level summary of the specialized skills developed 
 | **manage-themes** | Handle visual styling, CSS integration, and theme-specific properties. |
 | **manage-labels** | Manage internationalization (i18n) and UI text labels across multiple languages. |
 | **manage-content** | Work with the OFBiz Content Management System (DataResource, Content, ElectronicText). |
+| **manage-pdf-export** | Design and implement professional documents (Invoices, Labels) using Apache FOP (PDF). |
 
 ## ⚙️ Logic & Flows
 | Skill | Description |
